@@ -103,10 +103,6 @@ const AdminDashboard = () => {
     record.User?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredAttendance = attendanceRecords.filter(record =>
-    record.User?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
     <div style={{ 
       minHeight: '100vh',
@@ -642,117 +638,431 @@ const AdminDashboard = () => {
 
         {/* Leave Requests Section */}
         {activeTab === 'leaves' && (
-          <div className="space-y-4">
-            {leaveRequests.length > 0 ? (
-              leaveRequests.map((leave) => (
-                <div key={leave.id} className="bg-white rounded-lg shadow-md p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <p className="text-lg font-semibold text-slate-900">{leave.User?.name}</p>
-                      <p className="text-sm text-slate-600">{leave.User?.email}</p>
+          <div style={{ width: '100%', boxSizing: 'border-box' }}>
+            {/* Filter Tabs */}
+            <div style={{ marginBottom: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              {['all', 'pending', 'approved', 'rejected'].map(status => (
+                <button
+                  key={status}
+                  onClick={() => setFilterStatus(status)}
+                  style={{
+                    padding: '10px 20px',
+                    background: filterStatus === status 
+                      ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' 
+                      : '#1f1f1f',
+                    color: filterStatus === status ? '#fff' : '#888',
+                    border: filterStatus === status ? 'none' : '1px solid #333',
+                    borderRadius: '10px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    textTransform: 'capitalize',
+                    boxSizing: 'border-box'
+                  }}
+                  onMouseOver={(e) => {
+                    if (filterStatus !== status) {
+                      e.target.style.borderColor = '#555';
+                      e.target.style.color = '#ccc';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (filterStatus !== status) {
+                      e.target.style.borderColor = '#333';
+                      e.target.style.color = '#888';
+                    }
+                  }}
+                >
+                  {status} ({leaveRequests.filter(l => status === 'all' || l.status === status).length})
+                </button>
+              ))}
+            </div>
+
+            {/* Leave Requests Grid */}
+            <div style={{
+              width: '100%',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(450px, 1fr))',
+              gap: '20px',
+              boxSizing: 'border-box'
+            }}>
+              {filteredLeaves.length > 0 ? (
+                filteredLeaves.map((leave) => (
+                  <div key={leave.id} style={{
+                    width: '100%',
+                    background: 'linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%)',
+                    borderRadius: '16px',
+                    padding: '28px',
+                    border: '1px solid #333',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                    boxSizing: 'border-box',
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.borderColor = '#444';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.borderColor = '#333';
+                  }}
+                  >
+                    {/* Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                          <div style={{
+                            width: '44px',
+                            height: '44px',
+                            minWidth: '44px',
+                            borderRadius: '10px',
+                            background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#fff',
+                            fontSize: '16px',
+                            fontWeight: '700'
+                          }}>
+                            {leave.User?.name?.charAt(0).toUpperCase() || '?'}
+                          </div>
+                          <div>
+                            <p style={{ color: '#fff', fontSize: '16px', fontWeight: '700', margin: '0 0 2px 0' }}>
+                              {leave.User?.name || 'Unknown User'}
+                            </p>
+                            <p style={{ color: '#888', fontSize: '13px', margin: 0 }}>
+                              {leave.User?.email || 'No email'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <span style={{
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        background: leave.status === 'pending'
+                          ? 'rgba(245, 158, 11, 0.15)'
+                          : leave.status === 'approved'
+                          ? 'rgba(16, 185, 129, 0.15)'
+                          : 'rgba(239, 68, 68, 0.15)',
+                        color: leave.status === 'pending'
+                          ? '#f59e0b'
+                          : leave.status === 'approved'
+                          ? '#10b981'
+                          : '#ef4444',
+                        border: leave.status === 'pending'
+                          ? '1px solid rgba(245, 158, 11, 0.3)'
+                          : leave.status === 'approved'
+                          ? '1px solid rgba(16, 185, 129, 0.3)'
+                          : '1px solid rgba(239, 68, 68, 0.3)',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {leave.status}
+                      </span>
                     </div>
-                    <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full">
-                      {leave.status}
-                    </span>
+
+                    {/* Leave Details */}
+                    <div style={{
+                      background: '#0a0a0a',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      marginBottom: '20px',
+                      border: '1px solid #333'
+                    }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                        <div>
+                          <p style={{ color: '#666', fontSize: '11px', margin: '0 0 6px 0', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>
+                            Leave Type
+                          </p>
+                          <p style={{ color: '#fff', fontSize: '14px', fontWeight: '700', margin: 0, textTransform: 'capitalize' }}>
+                            {leave.type}
+                          </p>
+                        </div>
+                        <div>
+                          <p style={{ color: '#666', fontSize: '11px', margin: '0 0 6px 0', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>
+                            Duration
+                          </p>
+                          <p style={{ color: '#fff', fontSize: '14px', fontWeight: '700', margin: 0 }}>
+                            {Math.ceil((new Date(leave.endDate) - new Date(leave.startDate)) / (1000 * 60 * 60 * 24)) + 1} days
+                          </p>
+                        </div>
+                      </div>
+                      <div>
+                        <p style={{ color: '#666', fontSize: '11px', margin: '0 0 6px 0', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>
+                          Date Range
+                        </p>
+                        <p style={{ color: '#3b82f6', fontSize: '14px', fontWeight: '600', margin: 0 }}>
+                          {new Date(leave.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          {' → '}
+                          {new Date(leave.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Reason */}
+                    {leave.reason && (
+                      <div style={{ marginBottom: '20px' }}>
+                        <p style={{ color: '#666', fontSize: '11px', margin: '0 0 8px 0', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>
+                          Reason
+                        </p>
+                        <p style={{ color: '#ccc', fontSize: '14px', margin: 0, lineHeight: '1.6', fontStyle: 'italic' }}>
+                          "{leave.reason}"
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    {leave.status === 'pending' && (
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        <button
+                          onClick={() => handleLeaveAction(leave.id, 'approved')}
+                          style={{
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            padding: '14px',
+                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontSize: '14px',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                            transition: 'all 0.3s',
+                            boxSizing: 'border-box'
+                          }}
+                          onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                          onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                        >
+                          <Check size={18} />
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleLeaveAction(leave.id, 'rejected')}
+                          style={{
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            padding: '14px',
+                            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontSize: '14px',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+                            transition: 'all 0.3s',
+                            boxSizing: 'border-box'
+                          }}
+                          onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                          onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                        >
+                          <X size={18} />
+                          Reject
+                        </button>
+                      </div>
+                    )}
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4 mb-4 p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <p className="text-xs text-slate-500 uppercase">Leave Type</p>
-                      <p className="font-medium text-slate-900 capitalize">{leave.type}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 uppercase">Duration</p>
-                      <p className="font-medium text-slate-900">
-                        {new Date(leave.startDate).toLocaleDateString()} to{' '}
-                        {new Date(leave.endDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-
-                  {leave.reason && (
-                    <div className="mb-4">
-                      <p className="text-xs text-slate-500 uppercase mb-1">Reason</p>
-                      <p className="text-slate-700">{leave.reason}</p>
-                    </div>
-                  )}
-
-                  {leave.status === 'pending' && (
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => handleLeaveAction(leave.id, 'approved')}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors"
-                      >
-                        <Check className="w-4 h-4" />
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => handleLeaveAction(leave.id, 'rejected')}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                        Reject
-                      </button>
-                    </div>
-                  )}
+                ))
+              ) : (
+                <div style={{
+                  gridColumn: '1 / -1',
+                  background: 'linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%)',
+                  borderRadius: '16px',
+                  padding: '60px',
+                  border: '1px solid #333',
+                  textAlign: 'center'
+                }}>
+                  <Calendar size={56} color="#444" style={{ margin: '0 auto 20px' }} />
+                  <p style={{ color: '#888', fontSize: '16px', margin: 0 }}>
+                    No {filterStatus !== 'all' ? filterStatus : ''} leave requests found
+                  </p>
                 </div>
-              ))
-            ) : (
-              <div className="bg-white rounded-lg shadow-md p-8 text-center text-slate-600">
-                No pending leave requests
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
 
         {/* Attendance Section */}
         {activeTab === 'attendance' && (
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Employee</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Date</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Clock In</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Clock Out</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {attendanceRecords.length > 0 ? (
-                    attendanceRecords.slice(0, 20).map((record) => (
-                      <tr key={record.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-slate-900 font-medium">
-                          {record.User?.name}
-                        </td>
-                        <td className="px-6 py-4 text-slate-600">
-                          {new Date(record.date).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 text-slate-600">{record.checkIn || '--'}</td>
-                        <td className="px-6 py-4 text-slate-600">{record.checkOut || '--'}</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            record.status === 'present'
-                              ? 'bg-green-100 text-green-700'
-                              : record.status === 'on-leave'
-                              ? 'bg-blue-100 text-blue-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}>
-                            {record.status}
-                          </span>
+          <div style={{ width: '100%', boxSizing: 'border-box' }}>
+            {/* Search Bar */}
+            <div style={{ marginBottom: '24px', position: 'relative' }}>
+              <Search size={20} color="#888" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
+              <input
+                type="text"
+                placeholder="Search by employee name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '14px 16px 14px 48px',
+                  background: '#1f1f1f',
+                  border: '1px solid #333',
+                  borderRadius: '12px',
+                  color: '#fff',
+                  fontSize: '15px',
+                  outline: 'none',
+                  transition: 'all 0.3s',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
+                onBlur={(e) => e.target.style.borderColor = '#333'}
+              />
+            </div>
+
+            {/* Attendance Table */}
+            <div style={{
+              width: '100%',
+              background: 'linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%)',
+              borderRadius: '16px',
+              border: '1px solid #333',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+              overflow: 'hidden',
+              boxSizing: 'border-box'
+            }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: '#0a0a0a', borderBottom: '2px solid #333' }}>
+                      <th style={{ padding: '20px 24px', textAlign: 'left', color: '#fff', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Employee
+                      </th>
+                      <th style={{ padding: '20px 24px', textAlign: 'left', color: '#fff', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Date
+                      </th>
+                      <th style={{ padding: '20px 24px', textAlign: 'left', color: '#fff', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Clock In
+                      </th>
+                      <th style={{ padding: '20px 24px', textAlign: 'left', color: '#fff', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Clock Out
+                      </th>
+                      <th style={{ padding: '20px 24px', textAlign: 'left', color: '#fff', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAttendance.length > 0 ? (
+                      filteredAttendance.slice(0, 50).map((record, index) => (
+                        <tr key={record.id} style={{
+                          borderBottom: index !== Math.min(filteredAttendance.length, 50) - 1 ? '1px solid #333' : 'none',
+                          transition: 'all 0.3s'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.background = '#252525'}
+                        onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <td style={{ padding: '20px 24px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{
+                                width: '40px',
+                                height: '40px',
+                                minWidth: '40px',
+                                borderRadius: '10px',
+                                background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#fff',
+                                fontSize: '15px',
+                                fontWeight: '700'
+                              }}>
+                                {record.User?.name?.charAt(0).toUpperCase() || '?'}
+                              </div>
+                              <span style={{ color: '#fff', fontSize: '15px', fontWeight: '600' }}>
+                                {record.User?.name || 'Unknown'}
+                              </span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '20px 24px' }}>
+                            <span style={{ color: '#ccc', fontSize: '14px' }}>
+                              {new Date(record.date).toLocaleDateString('en-US', { 
+                                weekday: 'short',
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </span>
+                          </td>
+                          <td style={{ padding: '20px 24px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <Clock size={16} color="#10b981" />
+                              <span style={{ color: '#10b981', fontSize: '14px', fontWeight: '700', fontFamily: 'monospace' }}>
+                                {record.checkIn || '--:--'}
+                              </span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '20px 24px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <Clock size={16} color="#f59e0b" />
+                              <span style={{ color: '#f59e0b', fontSize: '14px', fontWeight: '700', fontFamily: 'monospace' }}>
+                                {record.checkOut || '--:--'}
+                              </span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '20px 24px' }}>
+                            <span style={{
+                              padding: '8px 16px',
+                              borderRadius: '8px',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px',
+                              background: record.status === 'present'
+                                ? 'rgba(16, 185, 129, 0.15)'
+                                : record.status === 'on-leave'
+                                ? 'rgba(59, 130, 246, 0.15)'
+                                : 'rgba(239, 68, 68, 0.15)',
+                              color: record.status === 'present'
+                                ? '#10b981'
+                                : record.status === 'on-leave'
+                                ? '#3b82f6'
+                                : '#ef4444',
+                              border: record.status === 'present'
+                                ? '1px solid rgba(16, 185, 129, 0.3)'
+                                : record.status === 'on-leave'
+                                ? '1px solid rgba(59, 130, 246, 0.3)'
+                                : '1px solid rgba(239, 68, 68, 0.3)'
+                            }}>
+                              {record.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" style={{ padding: '60px 24px', textAlign: 'center' }}>
+                          <Clock size={48} color="#444" style={{ margin: '0 auto 16px' }} />
+                          <p style={{ color: '#888', fontSize: '15px', margin: 0 }}>
+                            {searchTerm ? 'No attendance records found matching your search' : 'No attendance records found'}
+                          </p>
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center text-slate-600">
-                        No attendance records
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              {filteredAttendance.length > 50 && (
+                <div style={{
+                  padding: '16px 24px',
+                  background: '#0a0a0a',
+                  borderTop: '1px solid #333',
+                  textAlign: 'center'
+                }}>
+                  <p style={{ color: '#888', fontSize: '13px', margin: 0 }}>
+                    Showing 50 of {filteredAttendance.length} records
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
